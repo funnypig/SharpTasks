@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import axios from "axios";
-import saveAs from 'file-saver';
+import FileSaver from 'file-saver';
 
 export class PptxMaker extends Component{
     static displayName = PptxMaker.name;
@@ -112,11 +112,16 @@ export class PptxMaker extends Component{
         form.append('fontSize',this.state.selectedSize);
         
         axios.post('api/FileMaker/Upload', form)
-            .then(function(resp){
-                console.log(resp);
-                var blob = new Blob([resp.data], {type:"application/application/vnd.openxmlformats-officedocument.presentationml.presentation"});
-                saveAs(blob, "output.pptx");
+            .then(function(response){
+                var binaryString =  window.atob(response.data);
+                var binaryLen = binaryString.length;
+                var bytes = new Uint8Array(binaryLen);
+                for (var i = 0; i < binaryLen; i++){
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
                 
+                var blob = new Blob([bytes], {type: "octet/stream"});
+                FileSaver.saveAs(blob, "output.pptx");
             })
             .catch(function (ex) {
                 console.error(ex);

@@ -73,6 +73,9 @@
         <e p="appsettings.Development.json" t="Include" />
         <e p="appsettings.json" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
+        <e p="input.gz" t="Include" />
+        <e p="input.ppt" t="Include" />
+        <e p="input.pptx" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.2" t="Include">
@@ -80,6 +83,8 @@
             </e>
           </e>
         </e>
+        <e p="output.ppt" t="Include" />
+        <e p="output.pptx" t="Include" />
         <e p="sharpTask_PowerPoint.csproj" t="IncludeRecursive" />
       </e>
       <e p="sharpTask_PowerPoint.sln" t="IncludeFlat" />

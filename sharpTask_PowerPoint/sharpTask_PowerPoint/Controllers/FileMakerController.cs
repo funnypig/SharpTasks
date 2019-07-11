@@ -45,16 +45,27 @@ namespace sharpTask_PowerPoint.Controllers
         {
             var file = fileCollection.Files[0];
             
+            // save uploaded file
             var name = "input."+file.FileName.Split('.').Last();
             using (var stream = new FileStream(name, FileMode.Create))
             {
-                await file.CopyToAsync(stream);
+                 await file.CopyToAsync(stream);
+            }
+            
+            //  change pptx 
+            string newFileName = MakeFile(name, fontName, fontSize);
+            
+            // save output.pptx
+            
+            var mStream = new MemoryStream();
+            using (var fStream = new FileStream(newFileName, FileMode.Open))
+            {
+                await fStream.CopyToAsync(mStream);
             }
 
-            string newFileName = MakeFile(name, fontName, fontSize);
-
-            return File(new FileStream(newFileName, FileMode.Open),
-                "application/vnd.openxmlformats-officedocument.presentationml.presentation", newFileName);
+            mStream.Position = 0;
+            return Ok(mStream.ToArray());
+            return File(mStream, System.Net.Mime.MediaTypeNames.Text.Xml, "output.pptx");
         }
         
         public string MakeFile(string fileName, string fontName, string _fontSize)
@@ -70,7 +81,8 @@ namespace sharpTask_PowerPoint.Controllers
             
             var presentation = new Presentation();
             presentation.LoadFromFile(fileName);
-
+            
+            TextFont mFont = new TextFont(fontName);
             
             for (int i = 0; i < presentation.Slides.Count; i++)
             {
@@ -78,12 +90,21 @@ namespace sharpTask_PowerPoint.Controllers
                 {
                     for (int j = 0; j<presentation.Slides[i].Shapes.Count; j++)
                     {
-                        var shape = presentation.Slides[i].Shapes[j];
-                        if (shape is IAutoShape)
+                        if (presentation.Slides[i].Shapes[j] is IAutoShape)
                         {
-                            ((IAutoShape) shape).TextFrame.TextRange.LatinFont = new TextFont(fontName);
-                            ((IAutoShape) shape).TextFrame.TextRange.FontHeight = fontSize;
-                        }       
+                            var shape = presentation.Slides[i].Shapes[j] as IAutoShape;
+                            if (shape.TextFrame != null)
+                            {
+                                foreach (TextParagraph p in shape.TextFrame.Paragraphs)
+                                {
+                                    foreach (TextRange text in p.TextRanges)
+                                    {
+                                        text.LatinFont = mFont;
+                                        text.FontHeight = fontSize;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 catch 
