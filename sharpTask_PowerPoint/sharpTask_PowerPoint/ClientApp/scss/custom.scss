@@ -1,0 +1,8 @@
+@mixin chooseStyle{
+  margin: 10px;
+}
+
+@mixin comment{
+  font-style: italic;
+  color:darkgrey;
+}
